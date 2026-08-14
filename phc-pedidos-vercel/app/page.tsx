@@ -19,6 +19,13 @@ type OrderItem = {
   lineTotal: number;
 };
 
+type CustomExtra = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
 type Order = {
   id: string;
   orderNumber: string;
@@ -302,7 +309,7 @@ function NewOrderView({ cart, change, attendant, editingOrder, onSaved, onStopEd
   onSaved: (edited: boolean) => void;
   onStopEditing: () => void;
 }) {
-  const [category, setCategory] = useState<"Todos" | Product["category"]>("Todos");
+  const [category, setCategory] = useState<"Todos" | Product["category"] | "Extras">("Todos");
   const [customerName, setCustomerName] = useState(editingOrder?.customerName === "Balcão" ? "" : editingOrder?.customerName || "");
   const [notes, setNotes] = useState(editingOrder?.notes || "");
   const [paymentMethod, setPaymentMethod] = useState(editingOrder?.paymentMethod || "Pix");
@@ -310,12 +317,44 @@ function NewOrderView({ cart, change, attendant, editingOrder, onSaved, onStopEd
   const [showCheckout, setShowCheckout] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [extraName, setExtraName] = useState("");
+  const [extraPrice, setExtraPrice] = useState("");
+  const [extraError, setExtraError] = useState("");
+  const [customExtras, setCustomExtras] = useState<CustomExtra[]>(() =>
+    (editingOrder?.items || [])
+      .filter((item) => !products.some((product) => product.id === item.productId))
+      .map((item) => ({ id: item.productId, name: item.productName, price: item.unitPrice, quantity: item.quantity })),
+  );
 
   const selected = products.filter((product) => cart[product.id] > 0);
-  const count = selected.reduce((sum, product) => sum + cart[product.id], 0);
-  const total = selected.reduce((sum, product) => sum + product.price * cart[product.id], 0);
-  const filtered = category === "Todos" ? products : products.filter((product) => product.category === category);
+  const selectedExtras = customExtras.filter((extra) => extra.quantity > 0);
+  const count = selected.reduce((sum, product) => sum + cart[product.id], 0) + selectedExtras.reduce((sum, extra) => sum + extra.quantity, 0);
+  const total = selected.reduce((sum, product) => sum + product.price * cart[product.id], 0) + selectedExtras.reduce((sum, extra) => sum + extra.price * extra.quantity, 0);
+  const filtered = category === "Todos" ? products : category === "Extras" ? [] : products.filter((product) => product.category === category);
   const changeDue = paymentMethod === "Dinheiro" && Number(amountReceived) >= total ? Number(amountReceived) - total : 0;
+
+  function addExtra() {
+    const name = extraName.trim();
+    const price = Number(extraPrice.replace(",", "."));
+    if (!name) {
+      setExtraError("Digite o nome do extra.");
+      return;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+      setExtraError("Digite um valor válido para o extra.");
+      return;
+    }
+    setCustomExtras((current) => [...current, { id: `extra-${crypto.randomUUID()}`, name, price: Math.round(price * 100) / 100, quantity: 1 }]);
+    setExtraName("");
+    setExtraPrice("");
+    setExtraError("");
+  }
+
+  function changeExtra(id: string, delta: number) {
+    setCustomExtras((current) => current
+      .map((extra) => extra.id === id ? { ...extra, quantity: Math.max(0, extra.quantity + delta) } : extra)
+      .filter((extra) => extra.quantity > 0));
+  }
 
   async function saveOrder() {
     setSaving(true);
@@ -330,7 +369,10 @@ function NewOrderView({ cart, change, attendant, editingOrder, onSaved, onStopEd
           paymentMethod,
           amountReceived: paymentMethod === "Dinheiro" && amountReceived ? Number(amountReceived) : null,
           notes,
-          items: selected.map((product) => ({ productId: product.id, quantity: cart[product.id] })),
+          items: [
+            ...selected.map((product) => ({ productId: product.id, quantity: cart[product.id] })),
+            ...selectedExtras.map((extra) => ({ productId: extra.id, productName: extra.name, category: "Extras", unitPrice: extra.price, quantity: extra.quantity })),
+          ],
         }),
       });
       const data = await response.json() as { error?: string };
@@ -350,17 +392,35 @@ function NewOrderView({ cart, change, attendant, editingOrder, onSaved, onStopEd
 
       {!showCheckout ? <>
         <div className="category-tabs">
-          {(["Todos", "Espetinhos", "Combos", "Bebidas"] as const).map((item) => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}
+          {(["Todos", "Espetinhos", "Combos", "Bebidas", "Extras"] as const).map((item) => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}
         </div>
-        <div className="product-grid">
+        {category !== "Extras" && <div className={`product-grid ${category === "Todos" ? "has-extras" : ""}`}>
           {filtered.map((product) => <ProductCard key={product.id} product={product} quantity={cart[product.id] || 0} change={change} />)}
-        </div>
+        </div>}
+        {(category === "Todos" || category === "Extras") && <section className="extras-panel">
+          <div className="extras-heading"><div><span>VALOR LIVRE</span><h2>Adicionar extra</h2></div><b>＋</b></div>
+          <p>Use para qualquer adicional que não esteja no cardápio. Informe o nome e o valor cobrado.</p>
+          <div className="extra-form">
+            <div className="field-group"><label htmlFor="extra-name">Nome do extra</label><input id="extra-name" value={extraName} onChange={(event) => setExtraName(event.target.value)} placeholder="Ex.: Farofa, molho ou pão" /></div>
+            <div className="field-group"><label htmlFor="extra-price">Valor</label><input id="extra-price" type="text" inputMode="decimal" value={extraPrice} onChange={(event) => setExtraPrice(event.target.value)} placeholder="0,00" /></div>
+            <button className="add-extra-button" onClick={addExtra}>Adicionar</button>
+          </div>
+          {extraError && <p className="error-message">{extraError}</p>}
+          {selectedExtras.length > 0 && <div className="extra-list">
+            {selectedExtras.map((extra) => <article key={extra.id}>
+              <div><strong>{extra.name}</strong><span>{money.format(extra.price)} cada</span></div>
+              <div className="extra-quantity"><button onClick={() => changeExtra(extra.id, -1)}>−</button><strong>{extra.quantity}</strong><button onClick={() => changeExtra(extra.id, 1)}>+</button></div>
+              <strong>{money.format(extra.price * extra.quantity)}</strong>
+            </article>)}
+          </div>}
+        </section>}
       </> : <div className="checkout-panel">
         <button className="text-button" onClick={() => setShowCheckout(false)}>← Voltar aos produtos</button>
         <div className="field-group"><label htmlFor="customer-name">Nome do cliente <small>(opcional)</small></label><input id="customer-name" value={customerName} onChange={(event) => setCustomerName(event.target.value)} placeholder="Ex.: Mesa 3 ou nome do cliente" /></div>
         <div className="checkout-items">
           <div className="section-heading"><h2>Resumo do pedido</h2><span>{count} {count === 1 ? "item" : "itens"}</span></div>
           {selected.map((product) => <div className="checkout-line" key={product.id}><span>{cart[product.id]}× {product.name}</span><strong>{money.format(product.price * cart[product.id])}</strong></div>)}
+          {selectedExtras.map((extra) => <div className="checkout-line" key={extra.id}><span>{extra.quantity}× {extra.name} <small>extra</small></span><strong>{money.format(extra.price * extra.quantity)}</strong></div>)}
           <div className="checkout-total"><span>Total</span><strong>{money.format(total)}</strong></div>
         </div>
         <div className="field-group"><label>Forma de pagamento</label><div className="payment-grid">{paymentMethods.map((method) => <button key={method} className={paymentMethod === method ? "active" : ""} onClick={() => setPaymentMethod(method)}>{method === "Pix" ? "◇" : method === "Dinheiro" ? "R$" : "▣"}<span>{method}</span></button>)}</div></div>
@@ -481,7 +541,8 @@ export default function Home() {
 
   function startEdit(order: Order) {
     setEditingOrder(order);
-    setCart(Object.fromEntries(order.items.map((item) => [item.productId, item.quantity])));
+    const catalogIds = new Set(products.map((product) => product.id));
+    setCart(Object.fromEntries(order.items.filter((item) => catalogIds.has(item.productId)).map((item) => [item.productId, item.quantity])));
     setTab("new");
   }
 

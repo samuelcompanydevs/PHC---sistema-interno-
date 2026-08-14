@@ -16,14 +16,16 @@ export const products: Product[] = [
   { id: "kafta", name: "Espetinho de kafta", shortName: "Kafta", category: "Espetinhos", price: 12, emoji: "🔥" },
   { id: "medalhao-frango", name: "Medalhão de frango", shortName: "Med. frango", category: "Espetinhos", price: 12, emoji: "🍗" },
   { id: "medalhao-carne", name: "Medalhão de carne", shortName: "Med. carne", category: "Espetinhos", price: 12, emoji: "🥓" },
+  { id: "queijo", name: "Espetinho de queijo", shortName: "Queijo", category: "Espetinhos", price: 8, emoji: "🧀" },
   { id: "espeto-pao", name: "Espeto no pão", shortName: "Espeto no pão", category: "Combos", price: 15, emoji: "🥖" },
   { id: "marmitinha", name: "Marmitinha de churrasco", shortName: "Marmitinha", category: "Combos", price: 16, emoji: "🍱" },
+  { id: "baiao-dois", name: "Baião de dois", shortName: "Baião de dois", category: "Combos", price: 22, emoji: "🍛" },
   { id: "cerveja", name: "Cerveja Original/Skol", shortName: "Cerveja", category: "Bebidas", price: 7, emoji: "🍺" },
   { id: "refrigerante", name: "Refrigerante", shortName: "Refrigerante", category: "Bebidas", price: 7, emoji: "🥤" },
+  { id: "refrigerante-pequeno", name: "Refrigerante pequeno", shortName: "Refri pequeno", category: "Bebidas", price: 4.5, emoji: "🥤" },
   { id: "garrafinha", name: "Garrafinha de água", shortName: "Água", category: "Bebidas", price: 4.5, emoji: "💧" },
   { id: "suco", name: "Suco", shortName: "Suco", category: "Bebidas", price: 8, emoji: "🧃" },
   { id: "acai", name: "Vitamina de açaí", shortName: "Açaí", category: "Bebidas", price: 12, emoji: "🫐" },
 ];
 
 export const productById = new Map(products.map((product) => [product.id, product]));
-

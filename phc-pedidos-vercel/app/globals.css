@@ -108,6 +108,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .category-tabs button, .range-tabs button { flex: 0 0 auto; border: 1px solid #ded9d3; background: #fff; color: #56514c; border-radius: 999px; padding: 9px 14px; font-size: 12px; font-weight: 700; }
 .category-tabs button.active, .range-tabs button.active { border-color: #171718; background: #171718; color: #fff; }
 .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-bottom: 85px; }
+.product-grid.has-extras { padding-bottom: 14px; }
 .product-card { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 16px; min-height: 112px; overflow: hidden; transition: .18s ease; }
 .product-card.selected { border: 2px solid var(--orange); box-shadow: 0 4px 15px rgba(236,112,0,.12); }
 .product-main { width: 100%; min-height: 110px; border: 0; background: transparent; display: flex; align-items: center; gap: 10px; text-align: left; padding: 14px; }
@@ -118,6 +119,24 @@ button { -webkit-tap-highlight-color: transparent; }
 .quantity-control { position: absolute; left: 7px; right: 7px; bottom: 7px; height: 34px; display: grid; grid-template-columns: 1fr 1fr 1fr; background: #171718; color: #fff; border-radius: 9px; overflow: hidden; align-items: center; text-align: center; }
 .quantity-control button { height: 100%; border: 0; background: transparent; color: #fff; font-size: 19px; }
 .quantity-control strong { font-size: 13px; }
+.extras-panel { margin-bottom: 86px; padding: 17px; border: 1px solid #e7d8c6; border-radius: 18px; background: linear-gradient(145deg, #fffaf3, #fff); box-shadow: 0 6px 20px rgba(83,45,10,.06); }
+.extras-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.extras-heading > div { display: flex; flex-direction: column; gap: 2px; }
+.extras-heading span { color: var(--orange-dark); font-size: 9px; font-weight: 850; letter-spacing: 1.2px; }
+.extras-heading h2 { margin: 0; font-size: 19px; letter-spacing: -.4px; }
+.extras-heading > b { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: #171718; font-size: 20px; }
+.extras-panel > p { margin: 9px 0 15px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.extra-form { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(90px, .8fr); gap: 9px; align-items: end; }
+.add-extra-button { grid-column: 1 / -1; border: 0; border-radius: 11px; padding: 12px; color: #fff; background: linear-gradient(135deg, #f17d00, #d84c08); font-size: 12px; font-weight: 800; }
+.extra-list { display: grid; gap: 7px; margin-top: 14px; padding-top: 13px; border-top: 1px solid #eee1d2; }
+.extra-list article { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 9px; padding: 9px; border-radius: 11px; background: #fff; border: 1px solid #eee6dc; }
+.extra-list article > div:first-child { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.extra-list article > div:first-child strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.extra-list article > div:first-child span { color: var(--muted); font-size: 9px; }
+.extra-list article > strong { font-size: 11px; color: var(--orange-dark); }
+.extra-quantity { height: 30px; display: grid; grid-template-columns: 28px 24px 28px; align-items: center; text-align: center; overflow: hidden; border-radius: 8px; background: #171718; color: #fff; }
+.extra-quantity button { height: 100%; border: 0; background: transparent; color: #fff; font-size: 17px; }
+.extra-quantity strong { font-size: 11px; }
 .sticky-cart { position: fixed; z-index: 28; bottom: 79px; left: 50%; transform: translateX(-50%); width: min(calc(100% - 24px), 616px); border-radius: 17px; padding: 10px 10px 10px 16px; background: rgba(16,16,17,.97); color: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.3); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(12px); }
 .sticky-cart > div { display: flex; flex-direction: column; }
 .sticky-cart span { color: #aaa; font-size: 10px; text-transform: uppercase; }

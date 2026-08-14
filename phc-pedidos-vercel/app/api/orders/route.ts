@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       paymentMethod?: string;
       amountReceived?: number | null;
       notes?: string;
-      items?: Array<{ productId: string; quantity: number }>;
+      items?: Array<{ productId: string; quantity: number; productName?: string; category?: string; unitPrice?: number }>;
     };
 
     const attendant = payload.attendant?.trim();
@@ -67,9 +67,27 @@ export async function POST(request: Request) {
     const normalized = requestedItems.map((item) => {
       const product = productById.get(item.productId);
       const quantity = Math.max(0, Math.floor(Number(item.quantity)));
-      if (!product || quantity < 1) throw new Error("Existe um produto inválido no pedido.");
+      if (quantity < 1) throw new Error("Existe um produto inválido no pedido.");
+      if (!product) {
+        const productName = item.productName?.trim().slice(0, 80);
+        const unitPrice = money(Number(item.unitPrice));
+        if (!item.productId.startsWith("extra-") || !productName || !Number.isFinite(unitPrice) || unitPrice <= 0) {
+          throw new Error("Existe um extra inválido no pedido.");
+        }
+        return {
+          productId: item.productId,
+          productName,
+          category: "Extras",
+          unitPrice,
+          quantity,
+          lineTotal: money(unitPrice * quantity),
+        };
+      }
       return {
-        product,
+        productId: product.id,
+        productName: product.name,
+        category: product.category,
+        unitPrice: product.price,
         quantity,
         lineTotal: money(product.price * quantity),
       };
@@ -104,14 +122,14 @@ export async function POST(request: Request) {
 
     await db.insert(orders).values(order);
     await db.insert(orderItems).values(
-      normalized.map(({ product, quantity, lineTotal }) => ({
+      normalized.map(({ productId, productName, category, unitPrice, quantity, lineTotal }) => ({
         id: crypto.randomUUID(),
         orderId: id,
-        productId: product.id,
-        productName: product.name,
-        category: product.category,
+        productId,
+        productName,
+        category,
         quantity,
-        unitPrice: product.price,
+        unitPrice,
         lineTotal,
       })),
     );
