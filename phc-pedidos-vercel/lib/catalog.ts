@@ -20,7 +20,7 @@ export const products: Product[] = [
   { id: "espeto-pao", name: "Espeto no pão", shortName: "Espeto no pão", category: "Combos", price: 15, emoji: "🥖" },
   { id: "marmitinha", name: "Marmitinha de churrasco", shortName: "Marmitinha", category: "Combos", price: 16, emoji: "🍱" },
   { id: "baiao-dois", name: "Baião de dois", shortName: "Baião de dois", category: "Combos", price: 22, emoji: "🍛" },
-  { id: "combo-lanche", name: "Combo de lanche", shortName: "Combo lanche", category: "Combos", price: 35, emoji: "🍔" },
+  { id: "combo-lanche", name: "Combo de lanche", shortName: "Combo de lanche", category: "Combos", price: 35, emoji: "🍔" },
   { id: "marmita-grande", name: "Marmita grande", shortName: "Marmita grande", category: "Combos", price: 25, emoji: "🍱" },
   { id: "cerveja", name: "Cerveja Original/Skol", shortName: "Cerveja", category: "Bebidas", price: 7, emoji: "🍺" },
   { id: "refrigerante", name: "Refrigerante", shortName: "Refrigerante", category: "Bebidas", price: 7, emoji: "🥤" },
